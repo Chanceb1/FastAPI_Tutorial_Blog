@@ -46,3 +46,30 @@ def get_blog(blog_id: int, db: Session = Depends(get_db)):
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
     return blog
+
+
+# delete a blog
+@router.delete("/{blog_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_blog(blog_id: int, db: Session = Depends(get_db)):
+    blog = db.query(BlogModel).filter(BlogModel.id == blog_id).first()
+    if not blog:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    db.delete(blog)
+    db.commit()
+    return {"message": "Blog deleted successfully"}
+
+
+# update a blog
+@router.put("/{blog_id}", response_model=BlogSchema)
+def update_blog(blog_id: int, blog: BlogSchema, db: Session = Depends(get_db)):
+    existing_blog = db.query(BlogModel).filter(BlogModel.id == blog_id).first()
+    if not existing_blog:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    
+    existing_blog.title = blog.title
+    existing_blog.content = blog.content
+    existing_blog.published = blog.published if blog.published is not None else True
+    
+    db.commit()
+    db.refresh(existing_blog)
+    return existing_blog
