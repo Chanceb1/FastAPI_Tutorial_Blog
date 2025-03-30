@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from app.schemas.schemas import Blog
 from app.routers.blog_router import router as blog_router
-from app.models.models import Blog as BlogModel
+from app.routers.user_router import router as user_router
 from app.database import Base, engine
 
 app = FastAPI()
@@ -58,7 +57,13 @@ async def system_status():
 
 # include the blog router
 app.include_router(blog_router)
+app.include_router(user_router)
 
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="localhost", port=5000, reload=True)
+    uvicorn.run(
+        "app.main:app",
+        host="localhost", 
+        port=5000,
+        reload=True  # Enable hot reload
+    )
