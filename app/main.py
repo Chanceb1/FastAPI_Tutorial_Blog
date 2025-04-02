@@ -3,7 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from app.routers.blog_router import router as blog_router
 from app.routers.user_router import router as user_router
+from app.routers.auth_router import router as auth_router
 from app.database import Base, engine
+
 
 app = FastAPI()
 
@@ -49,15 +51,11 @@ async def test_endpoint(data: str | None = None):
         return {"message": f"Received data: {data}"}
 
 
-# Example of a route with a different tag
-@app.get("/status", tags=["System"])
-async def system_status():
-    return {"status": "operational"}
 
-
-# include the blog router
+# include apirouters
 app.include_router(blog_router)
 app.include_router(user_router)
+app.include_router(auth_router)
 
 
 if __name__ == "__main__":

@@ -11,3 +11,8 @@ class User(BaseModel):
     name: str = Field(..., title="User Name")
     email: str = Field(..., title="User Email")
     password: str = Field(..., title="User Password")
+
+
+class login(BaseModel):
+    email: str = Field(..., title="User Email")
+    password: str = Field(..., title="User Password")

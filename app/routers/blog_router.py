@@ -3,20 +3,16 @@ from sqlalchemy.orm import Session
 from app.models.models import Blog as BlogModel
 from app.schemas.schemas import Blog as BlogSchema
 from app.database import SessionLocal
+from app.utils.blog import get_all_blogs, get_blog_by_id
+from app.database import get_db
+
 
 router = APIRouter(
     prefix="/blogs",
     tags=["Blogs"],
-    responses={404: {"description": "Not found"}},
+    # dependencies=[Depends(get_db)],
 )
 
-# Dependency to get the DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # create a new blog
 @router.post("/", response_model=BlogSchema, status_code=status.HTTP_201_CREATED)
@@ -35,14 +31,16 @@ def create_blog(blog: BlogSchema, db: Session = Depends(get_db)):
 ## return all blogs
 @router.get("/", response_model=list[BlogSchema])
 def get_blogs(db: Session = Depends(get_db)):
-    blogs = db.query(BlogModel).all()
+    blogs = get_all_blogs(db)  # Use the utility function to get all blogs
+    if not blogs:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No blogs found")
     return blogs
 
 
-# get blog by id
-@router.get("/{blog_id}", response_model=BlogSchema)
-def get_blog(blog_id: int, db: Session = Depends(get_db)):
-    blog = db.query(BlogModel).filter(BlogModel.id == blog_id).first()
+# get blog by email
+@router.get("/{blog_email}", response_model=BlogSchema)
+def get_blog(blog_email: str, db: Session = Depends(get_db)):
+    blog = db.query(BlogModel).filter(BlogModel.email == blog_email).first()
     if not blog:
         raise HTTPException(status_code=404, detail="Blog not found")
     return blog
